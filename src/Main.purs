@@ -57,7 +57,7 @@ transform i j = {x: i.x + j.x, y: i.y + j.y}
 
 rotate90d :: Matrix
 rotate90d p = {x: -p.y, y: p.x}
- 
+
 randomTile :: forall a. GameEnv a -> Effect (Board a)
 randomTile env = do
     i <- randomInt 0 (length env.pieces - 1)
@@ -78,12 +78,12 @@ initGame :: forall a. GameEnv a -> Effect (Running a)
 initGame env = do
     player <- randomTile env >>= initPlayer env
     pure { player: player, board: empty, score: 0 }
- 
+
 stepShift :: forall a. Int -> GameEnv a -> Running a -> Running a
 stepShift x env prev = let
     run = prev { player = prev.player { offset = transform {x:x,y:0} prev.player.offset } }
     in if affordable env run then run else prev
- 
+
 stepRotate :: forall a. GameEnv a -> Running a -> Running a
 stepRotate env prev = let
     run = prev { player = prev.player { orient = prev.player.orient >>> rotate90d } }
@@ -139,7 +139,7 @@ in_board :: Int -> Int -> Point -> Boolean
 in_board w h p =
   (0 <= p.x) && (p.x < w)
   && (0 <= p.y) && (p.y < h)
- 
+
 currentTile :: forall a. Player a -> Board a
 currentTile player = mapKeys (pt player) player.tile
 
@@ -147,7 +147,7 @@ pt :: forall a. Player a -> Point -> Point
 pt player = transform player.offset <<< player.orient
 
 
-initGameEnv :: GameEnv String 
+initGameEnv :: GameEnv String
 initGameEnv = { pieces: tetrominoes, width: 14, height: 25 }
 
 tetrominoes :: Array (Board String)
