@@ -261,7 +261,7 @@ onKeyEvent env gameRef Nothing = pure unit
 gameStep :: GameEnv -> Ref GameState -> Aff Unit
 gameStep env gameRef = do
   speed <- liftEffect $ map gameSpeed (read gameRef)
-  delay $ Milliseconds speed
+  delay $ Milliseconds $ toNumber speed
   game <- liftEffect $ read gameRef
   game' <- liftEffect $ sequence (game >>= stepDown env)
   liftEffect $ write game' gameRef
@@ -269,41 +269,12 @@ gameStep env gameRef = do
     Left _ -> pure unit
     Right _ -> gameStep env gameRef
 
-gameSpeed :: GameState -> Number
+gameSpeed :: GameState -> Int
 gameSpeed (Right g)
-  | g.score < 20 = 700.0
+  | g.score < 140 = 100 * (7 - g.score / 20)
+  | g.score < 220 = 10 * (16 - g.score / 20)
 
-gameSpeed (Right g)
-  | g.score < 40 = 600.0
-
-gameSpeed (Right g)
-  | g.score < 60 = 500.0
-
-gameSpeed (Right g)
-  | g.score < 80 = 400.0
-
-gameSpeed (Right g)
-  | g.score < 100 = 300.0
-
-gameSpeed (Right g)
-  | g.score < 120 = 200.0
-
-gameSpeed (Right g)
-  | g.score < 140 = 100.0
-
-gameSpeed (Right g)
-  | g.score < 160 = 90.0
-
-gameSpeed (Right g)
-  | g.score < 180 = 80.0
-
-gameSpeed (Right g)
-  | g.score < 200 = 70.0
-
-gameSpeed (Right g)
-  | g.score < 220 = 60.0
-
-gameSpeed g = 50.0
+gameSpeed _ = 50
 
 display ::
   Window ->
