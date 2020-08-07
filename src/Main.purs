@@ -1,32 +1,31 @@
 module Main where
 
+import Prelude
 import Data.Array ((..), index)
 import Data.Either (Either(..))
-import Data.Foldable
-import Data.FoldableWithIndex
+import Data.Foldable (all, any, foldl, length, null)
+import Data.FoldableWithIndex (foldlWithIndex)
 import Data.Int (toNumber)
 import Data.Map (Map, insert, union, intersection, keys, empty)
 import Data.Maybe (Maybe(..))
 import Data.Number.Format (toString)
 import Data.Set (size, filter)
-import Data.Traversable (sequence, sequence_)
+import Data.Traversable (sequence)
 import Effect.Aff (Aff, delay, Milliseconds(..), launchAff_)
 import Effect.Class (liftEffect)
-import Effect.Console (log)
 import Effect (Effect)
 import Effect.Random (randomInt)
 import Effect.Ref (Ref, new, read, write)
-import Graphics.Canvas
-import Prelude
-import Web.Event.Event
-import Web.Event.EventTarget
+import Graphics.Canvas (Context2D, TextAlign(..), fillPath, fillText, getCanvasElementById, getContext2D, rect, setFillStyle, setTextAlign)
+import Web.Event.Event (EventType(..), preventDefault)
+import Web.Event.EventTarget (addEventListener, eventListener)
 import Web.DOM.Element (toEventTarget)
 import Web.DOM.Document (toNonElementParentNode)
-import Web.DOM.NonElementParentNode
+import Web.DOM.NonElementParentNode (getElementById)
 import Web.HTML (window)
 import Web.HTML.HTMLDocument (toDocument)
 import Web.HTML.Window (Window, document, requestAnimationFrame)
-import Web.UIEvent.KeyboardEvent
+import Web.UIEvent.KeyboardEvent (KeyboardEvent, fromEvent, key, toEvent)
 
 type Point
   = { x :: Int, y :: Int }
