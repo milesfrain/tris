@@ -194,27 +194,14 @@ initGameEnv = { pieces: tetrominoes, width: 14, height: 25 }
 
 tetrominoes :: Array (Board String)
 tetrominoes =
-  [ piece
-      [ { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: -1, y: 0 }
-      ]
-      "#800"
-  , piece
-      [ { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }
-      ]
-      "#080"
-  , piece
-      [ { x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }
-      ]
-      "#00C"
-  , piece
-      [ { x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }
-      ]
-      "#088"
-  , piece
-      [ { x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 1 }, { x: 0, y: 1 }
-      ]
-      "#808"
+  [ piece [ p 0 0, p 1 0, p 0 1, p 1 1 ] "#080"
+  , piece [ p (-1) 0, p 0 0, p 1 0, p 2 0 ] "#800"
+  , piece [ p (-1) 0, p 0 0, p 1 0, p 1 1 ] "#00C"
+  , piece [ p (-1) 0, p 0 0, p 1 0, p 0 1 ] "#088"
+  , piece [ p (-1) 0, p 0 0, p 1 1, p 0 1 ] "#808"
   ]
+  where
+  p x y = { x, y }
 
 piece :: Array { x :: Int, y :: Int } -> String -> Board String
 piece indices color =
