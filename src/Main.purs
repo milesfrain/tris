@@ -30,8 +30,11 @@ import Web.UIEvent.KeyboardEvent (KeyboardEvent, fromEvent, key, toEvent)
 type Point
   = { x :: Int, y :: Int }
 
+type Color
+  = String
+
 type Board
-  = Map Point String
+  = Map Point Color
 
 type Matrix
   = Point -> Point
@@ -201,7 +204,7 @@ tetrominoes =
   where
   p x y = { x, y }
 
-piece :: Array { x :: Int, y :: Int } -> String -> Board
+piece :: Array { x :: Int, y :: Int } -> Color -> Board
 piece indices color =
   foldl
     (\m p -> insert p color m)
@@ -371,7 +374,7 @@ displayNextTile ctx tile = do
     (pure unit)
     tile
 
-plot :: Context2D -> Point -> String -> Effect Unit
+plot :: Context2D -> Point -> Color -> Effect Unit
 plot ctx p color = do
   setFillStyle ctx color
   fillPath ctx
