@@ -1,29 +1,35 @@
 module Main where
 
 import Prelude
+
 import Data.Array ((..), index)
 import Data.Either (Either(..))
 import Data.Foldable (all, any, foldl, length, null)
 import Data.FoldableWithIndex (foldlWithIndex)
 import Data.Int (toNumber)
 import Data.Map (Map, insert, union, intersection, keys, empty)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), maybe)
 import Data.Number.Format (toString)
 import Data.Set (size, filter)
 import Data.Traversable (sequence)
+import Effect (Effect)
 import Effect.Aff (Aff, delay, Milliseconds(..), launchAff_)
 import Effect.Class (liftEffect)
-import Effect (Effect)
+import Effect.Exception (throw)
 import Effect.Random (randomInt)
 import Effect.Ref (Ref, new, read, write)
 import Graphics.Canvas (Context2D, TextAlign(..), fillPath, fillText, getCanvasElementById, getContext2D, rect, setFillStyle, setTextAlign)
+import Web.DOM.Document (createElement, toNonElementParentNode)
+import Web.DOM.Element (setAttribute, setId, toEventTarget)
+import Web.DOM.Element as Element
+import Web.DOM.Node (appendChild)
+import Web.DOM.NonElementParentNode (getElementById)
 import Web.Event.Event (EventType(..), preventDefault)
 import Web.Event.EventTarget (addEventListener, eventListener)
-import Web.DOM.Element (toEventTarget)
-import Web.DOM.Document (toNonElementParentNode)
-import Web.DOM.NonElementParentNode (getElementById)
 import Web.HTML (window)
 import Web.HTML.HTMLDocument (toDocument)
+import Web.HTML.HTMLDocument as HTMLDocument
+import Web.HTML.HTMLElement as HTMLElement
 import Web.HTML.Window (Window, document, requestAnimationFrame)
 import Web.UIEvent.KeyboardEvent (KeyboardEvent, fromEvent, key, toEvent)
 
@@ -219,16 +225,10 @@ main = do
     env = initGameEnv
   gameRef <- initGame env >>= (new <<< Right)
   keyEvent <- eventListener (onKeyEvent env gameRef <<< fromEvent)
-  canvas_elem <- getCanvasElementById "tris"
-  case canvas_elem of
-    Just canvas -> do
-      ctx <- getContext2D canvas
-      _ <- requestAnimationFrame (read gameRef >>= display w ctx gameRef) w
-      launchAff_ (gameStep env gameRef)
-      pure unit
-    Nothing -> do
-      pure unit
-  kbElem <- getElementById "tris" (toNonElementParentNode (toDocument d))
+  ctx <- getRenderNode
+  _ <- requestAnimationFrame (read gameRef >>= display w ctx gameRef) w
+  launchAff_ (gameStep env gameRef)
+  kbElem <- getElementById "canvas" (toNonElementParentNode (toDocument d))
   case kbElem of
     Just kb -> do
       addEventListener (EventType "keydown") keyEvent true (toEventTarget kb)
@@ -372,3 +372,31 @@ mapKeys' f m =
     )
     empty
     m
+
+-- HTML WORKAROUND
+--
+-- Create our HTML and return a canvas to render into.
+-- Note that this much more concise concise if written in HTML,
+-- but we need to use this workaround for compatibility with the
+-- TryPureScript environment, which doesn't yet allow providing
+-- custom HTML.
+getRenderNode :: Effect Context2D
+getRenderNode = do
+  htmlDoc <- document =<< window
+  body <- maybe (throw "Could not find body element") pure =<< HTMLDocument.body htmlDoc
+  let
+    doc = HTMLDocument.toDocument htmlDoc
+  canvasElem <- createElement "canvas" doc
+  setId "canvas" canvasElem
+  -- todo - calculate these values
+  setAttribute "width" "320" canvasElem
+  setAttribute "height" "480" canvasElem
+  -- todo temporary
+  setAttribute "tabindex" "1" canvasElem
+  let
+    bodyNode = HTMLElement.toNode body
+    canvasNode = Element.toNode canvasElem
+  void $ appendChild canvasNode bodyNode
+  canvas <- maybe (throw "Could not find canvas") pure =<< getCanvasElementById "canvas"
+  ctx <- getContext2D canvas
+  pure ctx
